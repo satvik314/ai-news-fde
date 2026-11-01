@@ -1,22 +1,21 @@
 import { useState } from 'react'
+import Icon from './icons.jsx'
+
+export { Icon }
 
 export const AGENTS = {
-  research: { name: 'Research Agent', short: 'Research', icon: '🔎', color: 'var(--c-research)', role: 'Scans the web for the latest AI news' },
-  human: { name: 'You · Editor', short: 'Approval', icon: '🧑‍💼', color: 'var(--c-human)', role: 'Approves which stories get written' },
-  twitter: { name: 'Twitter/X Agent', short: 'Twitter', icon: '𝕏', color: 'var(--c-twitter)', role: 'Writes scroll-stopping tweet threads' },
-  linkedin: { name: 'LinkedIn Agent', short: 'LinkedIn', icon: 'in', color: 'var(--c-linkedin)', role: 'Writes LinkedIn posts with your CTA' },
-  system: { name: 'Orchestrator', short: 'System', icon: '◆', color: 'var(--c-muted)', role: '' },
+  research: { name: 'Research Agent', short: 'Research', icon: 'search', color: 'var(--c-research)', role: 'Scans the web for the latest AI news' },
+  human: { name: 'You · Editor', short: 'Approval', icon: 'userCheck', color: 'var(--c-human)', role: 'Approves which stories get written' },
+  twitter: { name: 'Twitter/X Agent', short: 'Twitter', icon: 'x', color: 'var(--c-twitter)', role: 'Writes scroll-stopping tweet threads' },
+  linkedin: { name: 'LinkedIn Agent', short: 'LinkedIn', icon: 'linkedin', color: 'var(--c-linkedin)', role: 'Writes LinkedIn posts with your CTA' },
+  system: { name: 'Orchestrator', short: 'System', icon: 'sparkles', color: 'var(--c-muted)', role: '' },
 }
 
 export function AgentAvatar({ agent, size = 36, pulse = false }) {
   const a = AGENTS[agent]
   return (
-    <span
-      className={`agent-avatar ${pulse ? 'pulse' : ''}`}
-      style={{ '--agent': a.color, width: size, height: size, fontSize: size * 0.42 }}
-      aria-hidden
-    >
-      {a.icon}
+    <span className={`agent-avatar ${pulse ? 'pulse' : ''}`} style={{ '--agent': a.color, width: size, height: size }} aria-hidden>
+      <Icon name={a.icon} size={Math.round(size * 0.46)} />
     </span>
   )
 }
@@ -48,22 +47,40 @@ export function Stepper({ value, onChange, min, max, label }) {
   )
 }
 
-export function Segmented({ value, onChange, options }) {
+export function Segmented({ value, onChange, options, className = '' }) {
   return (
-    <div className="segmented" role="radiogroup">
+    <div className={`segmented ${className}`} role="radiogroup">
       {options.map((o) => (
         <button
           key={o.value}
           type="button"
           role="radio"
           aria-checked={value === o.value}
+          aria-label={o.title || undefined}
+          title={o.title}
           className={value === o.value ? 'active' : ''}
           onClick={() => onChange(o.value)}
         >
+          {o.icon && <Icon name={o.icon} size={14} />}
           {o.label}
         </button>
       ))}
     </div>
+  )
+}
+
+export function ThemeToggle({ value, onChange }) {
+  return (
+    <Segmented
+      className="theme-toggle"
+      value={value}
+      onChange={onChange}
+      options={[
+        { value: 'light', icon: 'sun', title: 'Light mode' },
+        { value: 'dark', icon: 'moon', title: 'Dark mode' },
+        { value: 'system', icon: 'monitor', title: 'Match system' },
+      ]}
+    />
   )
 }
 
@@ -83,8 +100,9 @@ export function CopyButton({ text, label = 'Copy', className = '' }) {
     setTimeout(() => setCopied(false), 1400)
   }
   return (
-    <button type="button" className={`btn btn-ghost btn-sm ${className}`} onClick={copy}>
-      {copied ? '✓ Copied' : label}
+    <button type="button" className={`btn btn-ghost btn-sm ${copied ? 'copied' : ''} ${className}`} onClick={copy}>
+      <Icon name={copied ? 'check' : 'copy'} size={13} />
+      {copied ? 'Copied' : label}
     </button>
   )
 }

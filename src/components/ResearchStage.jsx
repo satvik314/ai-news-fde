@@ -1,4 +1,4 @@
-import { AgentAvatar, Spinner } from './ui.jsx'
+import { AgentAvatar, Icon, Spinner } from './ui.jsx'
 
 export const MAX_SELECTED = 3
 
@@ -17,9 +17,9 @@ function StoryCard({ story, selected, disabled, onToggle }) {
         <span className="chip">{story.category}</span>
         <span className="hype" title={`Hype score ${story.hype_score}/10`}>
           <span className="hype-bar"><span style={{ width: `${(Number(story.hype_score) || 0) * 10}%` }} /></span>
-          🔥 {story.hype_score}
+          <Icon name="flame" size={12} /> {story.hype_score}
         </span>
-        <span className={`checkbox ${selected ? 'on' : ''}`}>{selected ? '✓' : ''}</span>
+        <span className={`checkbox ${selected ? 'on' : ''}`}>{selected && <Icon name="check" size={13} strokeWidth={3} />}</span>
       </div>
       <h4>{story.title}</h4>
       <p className="story-summary">{story.summary}</p>
@@ -34,7 +34,7 @@ function StoryCard({ story, selected, disabled, onToggle }) {
       <div className="story-meta">
         <span>{story.source}{story.published ? ` · ${story.published}` : ''}</span>
         {story.url && (
-          <a href={story.url} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>Read source ↗</a>
+          <a href={story.url} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>Source <Icon name="external" size={11} /></a>
         )}
       </div>
     </article>
@@ -53,10 +53,10 @@ export default function ResearchStage({ research, keysReady, onRun, onCancel, se
             The Research Agent plans its own searches, queries Google News through SerpAPI, de-duplicates
             coverage and ranks the <strong>5 stories</strong> most worth posting about. You then pick up to {MAX_SELECTED}.
           </p>
-          {research.status === 'error' && <div className="alert">⚠ {research.error}</div>}
-          {!keysReady && <div className="alert soft">Add your OpenAI and SerpAPI keys in the sidebar to begin.</div>}
+          {research.status === 'error' && <div className="alert"><Icon name="alert" size={16} /><span>{research.error}</span></div>}
+          {!keysReady && <div className="alert soft"><Icon name="key" size={15} /><span>Add your OpenAI and SerpAPI keys in the sidebar to begin.</span></div>}
           <button type="button" className="btn btn-primary btn-lg" disabled={!keysReady} onClick={onRun}>
-            {research.status === 'error' ? 'Retry research' : 'Run Research Agent'} →
+            <Icon name="play" size={14} /> {research.status === 'error' ? 'Retry research' : 'Run Research Agent'}
           </button>
         </div>
       </div>
@@ -72,7 +72,7 @@ export default function ResearchStage({ research, keysReady, onRun, onCancel, se
             <h3>Research Agent is working</h3>
             <p className="working-status"><Spinner size={13} /> {lastLog || 'Starting up…'}</p>
           </div>
-          <button type="button" className="btn btn-ghost btn-sm" onClick={onCancel}>Stop</button>
+          <button type="button" className="btn btn-ghost btn-sm" onClick={onCancel}><Icon name="stop" size={13} /> Stop</button>
         </div>
         <div className="story-grid">
           {Array.from({ length: 5 }).map((_, i) => <div key={i} className="story skeleton" style={{ animationDelay: `${i * 120}ms` }} />)}
@@ -93,9 +93,9 @@ export default function ResearchStage({ research, keysReady, onRun, onCancel, se
           </p>
         </div>
         <div className="stage-actions">
-          <button type="button" className="btn btn-ghost" onClick={onRun}>↻ Re-run research</button>
+          <button type="button" className="btn btn-ghost" onClick={onRun}><Icon name="refresh" size={14} /> Re-run</button>
           <button type="button" className="btn btn-primary" disabled={!count} onClick={onApprove}>
-            Approve {count || ''} {count === 1 ? 'story' : 'stories'} →
+            Approve {count || ''} {count === 1 ? 'story' : 'stories'} <Icon name="arrowRight" size={15} />
           </button>
         </div>
       </div>

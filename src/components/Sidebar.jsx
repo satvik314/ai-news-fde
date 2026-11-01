@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { AGENTS, AgentAvatar, Segmented, Toggle } from './ui.jsx'
+import { AGENTS, AgentAvatar, Icon, Segmented, Toggle } from './ui.jsx'
 
 function KeyField({ label, value, onChange, placeholder, href }) {
   const [show, setShow] = useState(false)
@@ -8,7 +8,7 @@ function KeyField({ label, value, onChange, placeholder, href }) {
     <div className="field">
       <div className="field-head">
         <span className="field-label">{label}</span>
-        <span className={`key-status ${ok ? 'ok' : ''}`}>{ok ? 'Connected' : 'Required'}</span>
+        <span className={`key-status ${ok ? 'ok' : ''}`}><i />{ok ? 'Added' : 'Required'}</span>
       </div>
       <div className="key-input">
         <input
@@ -20,10 +20,10 @@ function KeyField({ label, value, onChange, placeholder, href }) {
           spellCheck={false}
         />
         <button type="button" onClick={() => setShow((s) => !s)} aria-label={show ? 'Hide key' : 'Show key'}>
-          {show ? 'Hide' : 'Show'}
+          <Icon name={show ? 'eyeOff' : 'eye'} size={15} />
         </button>
       </div>
-      <a className="field-hint" href={href} target="_blank" rel="noreferrer">Get a key ↗</a>
+      <a className="field-hint" href={href} target="_blank" rel="noreferrer">Get a key <Icon name="external" size={11} /></a>
     </div>
   )
 }
@@ -40,7 +40,7 @@ export default function Sidebar({ config, update, agentStatus }) {
       </div>
 
       <section className="side-section">
-        <h3>API keys</h3>
+        <h3><Icon name="key" size={13} /> API keys</h3>
         <KeyField
           label="OpenAI API key"
           value={config.openaiKey}
@@ -59,7 +59,7 @@ export default function Sidebar({ config, update, agentStatus }) {
       </section>
 
       <section className="side-section">
-        <h3>Model</h3>
+        <h3><Icon name="zap" size={13} /> Model</h3>
         <div className="field">
           <input className="text-input mono" value={config.model} onChange={(e) => update({ model: e.target.value })} spellCheck={false} />
           <span className="field-hint muted">Shared by all three agents</span>
@@ -67,7 +67,7 @@ export default function Sidebar({ config, update, agentStatus }) {
       </section>
 
       <section className="side-section">
-        <h3>Research settings</h3>
+        <h3><Icon name="sliders" size={13} /> Research settings</h3>
         <div className="field">
           <span className="field-label">News window</span>
           <Segmented
@@ -93,7 +93,7 @@ export default function Sidebar({ config, update, agentStatus }) {
       </section>
 
       <section className="side-section">
-        <h3>Agent crew</h3>
+        <h3><Icon name="users" size={13} /> Agent crew</h3>
         <ul className="roster">
           {['research', 'twitter', 'linkedin'].map((id) => (
             <li key={id}>
@@ -108,7 +108,7 @@ export default function Sidebar({ config, update, agentStatus }) {
         </ul>
       </section>
 
-      <p className="privacy">🔒 Keys stay in your browser and are only sent to OpenAI and SerpAPI.</p>
+      <p className="privacy"><Icon name="lock" size={13} /> Keys stay in your browser and are only sent to OpenAI and SerpAPI.</p>
     </aside>
   )
 }

@@ -1,16 +1,22 @@
-// Minimal OpenAI Chat Completions client that runs in the browser with the
-// user's own key. Tool calling is used both for the research agent's search
-// loop and for structured (JSON) output from the writer agents.
-const OPENAI_URL = 'https://api.openai.com/v1/chat/completions'
+// Minimal OpenAI Responses API client (POST /v1/responses) that runs in the
+// browser with the user's own key. Newer reasoning models (e.g. gpt-6.1-sol)
+// only support function tools on the Responses API, so all agents use it:
+// the research agent for its search loop, the writer agents for structured output.
+const RESPONSES_URL = 'https://api.openai.com/v1/responses'
 
-export async function chatCompletion({ apiKey, model, messages, tools, toolChoice, signal }) {
-  const body = { model, messages }
+/**
+ * @returns {{ output: object[], text: string, functionCalls: {call_id: string, name: string, arguments: string}[] }}
+ */
+export async function createResponse({ apiKey, model, instructions, input, tools, toolChoice, signal }) {
+  const body = { model, input }
+  if (instructions) body.instructions = instructions
   if (tools?.length) {
-    body.tools = tools.map((fn) => ({ type: 'function', function: fn }))
+    // strict:false because our schemas use optional fields (strict defaults to true here).
+    body.tools = tools.map((fn) => ({ type: 'function', strict: false, ...fn }))
     body.tool_choice = toolChoice ?? 'auto'
   }
 
-  const res = await fetch(OPENAI_URL, {
+  const res = await fetch(RESPONSES_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
     body: JSON.stringify(body),
@@ -20,31 +26,39 @@ export async function chatCompletion({ apiKey, model, messages, tools, toolChoic
   if (!res.ok) {
     throw new Error(data?.error?.message || `OpenAI request failed (HTTP ${res.status})`)
   }
-  const message = data?.choices?.[0]?.message
-  if (!message) throw new Error('OpenAI returned an empty response')
-  return message
+  if (data.status === 'failed') {
+    throw new Error(data.error?.message || 'OpenAI response failed')
+  }
+
+  const output = Array.isArray(data.output) ? data.output : []
+  const text = output
+    .filter((item) => item.type === 'message')
+    .flatMap((item) => item.content || [])
+    .filter((c) => c.type === 'output_text')
+    .map((c) => c.text)
+    .join('\n')
+  const functionCalls = output.filter((item) => item.type === 'function_call')
+  return { output, text, functionCalls }
 }
 
 export function forceTool(name) {
-  return { type: 'function', function: { name } }
+  return { type: 'function', name }
 }
 
 /** Ask the model to answer by calling exactly one tool, and return its parsed arguments. */
 export async function structuredCall({ apiKey, model, system, user, tool, signal }) {
-  const message = await chatCompletion({
+  const { functionCalls, text } = await createResponse({
     apiKey,
     model,
-    messages: [
-      { role: 'system', content: system },
-      { role: 'user', content: user },
-    ],
+    instructions: system,
+    input: [{ role: 'user', content: user }],
     tools: [tool],
     toolChoice: forceTool(tool.name),
     signal,
   })
-  const call = message.tool_calls?.find((c) => c.function?.name === tool.name)
-  if (call) return parseJson(call.function.arguments)
-  return parseJson(message.content)
+  const call = functionCalls.find((c) => c.name === tool.name)
+  if (call) return parseJson(call.arguments)
+  return parseJson(text)
 }
 
 export function parseJson(text) {

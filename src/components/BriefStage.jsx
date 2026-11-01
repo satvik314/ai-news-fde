@@ -1,6 +1,6 @@
-import { AgentAvatar, Segmented, Stepper, Toggle } from './ui.jsx'
+import { AgentAvatar, Icon, Segmented, Stepper, Toggle } from './ui.jsx'
 
-const TONES = ['Insightful', 'Punchy', 'Educational', 'Contrarian', 'Conversational']
+const TONES = ['Insightful', 'Punchy', 'Educational', 'Contrarian', 'Casual']
 
 export function isValidUrl(v) {
   try {
@@ -93,7 +93,7 @@ export default function BriefStage({ stories, enabled, setEnabled, twitter, setT
           </div>
           <div className="field">
             <span className="field-label">CTA line (optional)</span>
-            <input className="text-input" value={linkedin.ctaText} onChange={(e) => setLinkedin({ ...linkedin, ctaText: e.target.value })} placeholder="e.g. Join our free Agentic AI workshop 👇" />
+            <input className="text-input" value={linkedin.ctaText} onChange={(e) => setLinkedin({ ...linkedin, ctaText: e.target.value })} placeholder="e.g. Join our free Agentic AI workshop" />
           </div>
           <div className="field">
             <span className="field-label">Tone</span>
@@ -115,9 +115,9 @@ export default function BriefStage({ stories, enabled, setEnabled, twitter, setT
       </div>
 
       <div className="stage-foot">
-        <button type="button" className="btn btn-ghost" onClick={onBack}>← Change stories</button>
+        <button type="button" className="btn btn-ghost" onClick={onBack}><Icon name="arrowLeft" size={15} /> Change stories</button>
         <button type="button" className="btn btn-primary btn-lg" disabled={!canLaunch} onClick={onLaunch}>
-          Deploy agents ▶
+          <Icon name="sparkles" size={16} /> Deploy agents
         </button>
       </div>
     </div>

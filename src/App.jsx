@@ -6,6 +6,8 @@ import ResearchStage, { MAX_SELECTED } from './components/ResearchStage.jsx'
 import BriefStage from './components/BriefStage.jsx'
 import ResultsStage from './components/ResultsStage.jsx'
 import { runLinkedInAgent, runResearchAgent, runTwitterAgent } from './lib/agents.js'
+import { Icon, ThemeToggle } from './components/ui.jsx'
+import { useTheme } from './lib/theme.js'
 
 const STORAGE_KEY = 'agentic-newsroom:config'
 const DEFAULT_MODEL = 'gpt-6.1-sol'
@@ -24,6 +26,7 @@ let logId = 0
 
 export default function App() {
   const [config, setConfig] = useState(loadConfig)
+  const [theme, setTheme] = useTheme()
   const [stage, setStage] = useState('research') // research → brief → results
   const [research, setResearch] = useState({ status: 'idle', stories: [], articlesScanned: 0, error: '' })
   const [selected, setSelected] = useState([])
@@ -178,7 +181,10 @@ export default function App() {
             <h2>Content pipeline</h2>
             <p className="muted">Research → Human approval → Twitter & LinkedIn agents</p>
           </div>
-          <span className="model-pill mono">⚡ {config.model || 'no model'}</span>
+          <div className="topbar-actions">
+            <span className="model-pill mono"><Icon name="zap" size={12} /> {config.model || 'no model'}</span>
+            <ThemeToggle value={theme} onChange={setTheme} />
+          </div>
         </header>
         <Pipeline status={agentStatus} details={details} />
 
