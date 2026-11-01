@@ -1,0 +1,20 @@
+{
+  "name": "ai-news-agents",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Agentic newsroom: a research agent finds the top AI news, you approve, and Twitter + LinkedIn agents write the content.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.1.2",
+    "vite": "^8.3.5"
+  }
+}
