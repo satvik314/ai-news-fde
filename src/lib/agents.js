@@ -1,4 +1,4 @@
-import { chatCompletion, forceTool, parseJson, structuredCall } from './openai.js'
+import { createResponse, forceTool, parseJson, structuredCall } from './openai.js'
 import { searchNews } from './serp.js'
 
 const today = () =>
@@ -73,8 +73,9 @@ How to work:
 5. Only use facts and URLs that appear in your search results. Never invent links.
 6. Finish by calling submit_top_stories with exactly 5 stories.${focus ? `\n\nThe editor asked you to pay special attention to: ${focus}` : ''}`
 
-  const messages = [
-    { role: 'system', content: system },
+  // Conversation state for the Responses API: user input, then every output
+  // item the model produced (reasoning, function calls) and our tool results.
+  const input = [
     { role: 'user', content: 'Research the latest AI news and bring me the top 5 stories worth creating content about.' },
   ]
 
@@ -82,26 +83,23 @@ How to work:
 
   for (let step = 0; step < MAX_RESEARCH_STEPS; step++) {
     const isLast = step === MAX_RESEARCH_STEPS - 1
-    const reply = await chatCompletion({
+    const reply = await createResponse({
       apiKey: openaiKey,
       model,
-      messages,
+      instructions: system,
+      input,
       tools: [SEARCH_TOOL, SUBMIT_STORIES_TOOL],
       toolChoice: isLast ? forceTool(SUBMIT_STORIES_TOOL.name) : 'auto',
       signal,
     })
 
-    const calls = reply.tool_calls || []
-    messages.push({
-      role: 'assistant',
-      content: reply.content ?? null,
-      ...(calls.length ? { tool_calls: calls } : {}),
-    })
-    if (reply.content?.trim()) log('thought', reply.content.trim().slice(0, 280))
+    input.push(...reply.output)
+    if (reply.text.trim()) log('thought', reply.text.trim().slice(0, 280))
+    const calls = reply.functionCalls
 
-    const submit = calls.find((c) => c.function?.name === SUBMIT_STORIES_TOOL.name)
+    const submit = calls.find((c) => c.name === SUBMIT_STORIES_TOOL.name)
     if (submit) {
-      const { stories = [] } = parseJson(submit.function.arguments)
+      const { stories = [] } = parseJson(submit.arguments)
       if (!stories.length) throw new Error('Research Agent submitted no stories')
       const ranked = stories.slice(0, 5).map((s, i) => ({ ...s, id: `story-${Date.now()}-${i}`, rank: i + 1 }))
       log('done', `Ranked top ${ranked.length} stories from ${seen.size} articles scanned.`)
@@ -109,7 +107,7 @@ How to work:
     }
 
     if (!calls.length) {
-      messages.push({ role: 'user', content: 'Now call submit_top_stories with exactly 5 stories.' })
+      input.push({ role: 'user', content: 'Now call submit_top_stories with exactly 5 stories.' })
       continue
     }
 
@@ -117,7 +115,7 @@ How to work:
       calls.map(async (call) => {
         let output
         try {
-          const args = parseJson(call.function.arguments)
+          const args = parseJson(call.arguments)
           const range = args.time_range || timeRange
           log('tool', `search_news("${args.query}")`, { range })
           const results = await searchNews({ apiKey: serpKey, query: args.query, timeRange: range, signal })
@@ -130,10 +128,10 @@ How to work:
           lastSearchError = err.message
           output = { error: err.message }
         }
-        return { role: 'tool', tool_call_id: call.id, content: JSON.stringify(output) }
+        return { type: 'function_call_output', call_id: call.call_id, output: JSON.stringify(output) }
       }),
     )
-    messages.push(...toolResults)
+    input.push(...toolResults)
     // Don't let the agent "research" with zero data — fail fast on a bad key / quota.
     if (seen.size === 0 && lastSearchError) {
       throw new Error(`SerpAPI search failed: ${lastSearchError}. Check your SerpAPI key and quota.`)
