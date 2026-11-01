@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
-import { AGENTS } from './ui.jsx'
+import { AGENTS, Icon } from './ui.jsx'
 
-const TYPE_ICON = { start: '▶', think: '…', thought: '💭', tool: '⚙', result: '↳', done: '✓', error: '✕', info: '•', human: '✋' }
+const TYPE_ICON = { start: '▸', think: '…', thought: '∴', tool: 'ƒ', result: '↳', done: '✓', error: '✕', info: '·', human: '◆' }
 
 export default function AgentConsole({ logs, onClear }) {
   const bodyRef = useRef(null)
@@ -12,7 +12,7 @@ export default function AgentConsole({ logs, onClear }) {
   return (
     <aside className="console">
       <div className="console-head">
-        <span className="live-dot" /> Agent activity
+        <Icon name="terminal" size={14} /> Agent activity <span className="live-dot" />
         {logs.length > 0 && (
           <button type="button" className="btn btn-ghost btn-xs" onClick={onClear}>Clear</button>
         )}

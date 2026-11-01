@@ -18,6 +18,8 @@ A Vite + React app where three AI agents and a human editor turn the latest AI n
 
 Every agent step (reasoning, tool calls, hand-offs) streams into the **Agent activity** console on the right.
 
+The app has **light and dark themes**. Use the sun / moon / monitor toggle in the top bar, which defaults to your system setting and remembers your choice.
+
 ## Setup
 
 ```bash
@@ -41,7 +43,7 @@ SerpAPI blocks direct browser requests, so the app calls `/api/serp`:
 - **`npm run dev` / `npm run preview`**: Vite proxies `/api/serp` to `https://serpapi.com/search.json` (see `vite.config.js`).
 - **Production**: `api/serp.js` is a serverless function that does the same job. Deploying to Vercel works with no extra configuration. On other hosts, point `/api/serp` at an equivalent proxy.
 
-OpenAI calls go straight from the browser to `api.openai.com` using the user's own key.
+OpenAI calls go straight from the browser to `api.openai.com/v1/responses` (the Responses API) using the user's own key. Newer reasoning models such as `gpt-6.1-sol` only support function tools on the Responses API, so the research loop and the writers' structured output both use it.
 
 ## Project structure
 
@@ -49,7 +51,8 @@ OpenAI calls go straight from the browser to `api.openai.com` using the user's o
 src/
   lib/
     agents.js      # Research loop + Twitter + LinkedIn agents (prompts, tool schemas)
-    openai.js      # Chat Completions client with tool calling / structured output
+    openai.js      # Responses API client with tool calling / structured output
+    theme.js       # Light / dark / system theme hook
     serp.js        # SerpAPI Google News search
   components/
     Sidebar.jsx    # API keys, model, research settings, agent roster

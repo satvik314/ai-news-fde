@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { AgentAvatar, CopyButton, Spinner } from './ui.jsx'
+import { AgentAvatar, CopyButton, Icon, Spinner } from './ui.jsx'
 
 const threadText = (thread) => thread.tweets.join('\n\n')
 
@@ -19,7 +19,7 @@ function TwitterOutput({ result, onRetry }) {
           <ol className="tweets">
             {thread.tweets.map((t, i) => (
               <li key={i} className="tweet">
-                <div className="tweet-rail"><span className="tweet-avatar">𝕏</span>{i < thread.tweets.length - 1 && <span className="tweet-line" />}</div>
+                <div className="tweet-rail"><span className="tweet-avatar"><Icon name="x" size={13} /></span>{i < thread.tweets.length - 1 && <span className="tweet-line" />}</div>
                 <div className="tweet-body">
                   <p>{t}</p>
                   <div className="tweet-foot">
@@ -81,8 +81,9 @@ function Working({ agent, text }) {
 function Failed({ text, onRetry }) {
   return (
     <div className="alert">
-      ⚠ {text}
-      <button type="button" className="btn btn-ghost btn-sm" onClick={onRetry}>Retry</button>
+      <Icon name="alert" size={16} />
+      <span>{text}</span>
+      <button type="button" className="btn btn-ghost btn-sm" onClick={onRetry}><Icon name="refresh" size={13} /> Retry</button>
     </div>
   )
 }
@@ -131,9 +132,9 @@ export default function ResultsStage({ stories, outputs, enabled, onRetry, onRes
           <p className="muted">Review, tweak and copy. Regenerate any piece you don’t love.</p>
         </div>
         <div className="stage-actions">
-          <button type="button" className="btn btn-ghost" onClick={onBack} disabled={!allDone}>← Re-brief agents</button>
-          <button type="button" className="btn btn-ghost" onClick={download} disabled={!allDone}>⬇ Export .md</button>
-          <button type="button" className="btn btn-primary" onClick={onRestart}>New run</button>
+          <button type="button" className="btn btn-ghost" onClick={onBack} disabled={!allDone}><Icon name="arrowLeft" size={15} /> Re-brief</button>
+          <button type="button" className="btn btn-ghost" onClick={download} disabled={!allDone}><Icon name="download" size={15} /> Export .md</button>
+          <button type="button" className="btn btn-primary" onClick={onRestart}><Icon name="sparkles" size={15} /> New run</button>
         </div>
       </div>
 
@@ -156,7 +157,7 @@ export default function ResultsStage({ stories, outputs, enabled, onRetry, onRes
               <AgentAvatar agent="twitter" size={30} />
               <h3>Twitter/X threads</h3>
               {out.twitter?.status === 'done' && (
-                <button type="button" className="btn btn-ghost btn-sm" onClick={() => onRetry(story, 'twitter')}>↻ Regenerate</button>
+                <button type="button" className="btn btn-ghost btn-sm" onClick={() => onRetry(story, 'twitter')}><Icon name="refresh" size={13} /> Regenerate</button>
               )}
             </header>
             <TwitterOutput result={out.twitter} onRetry={() => onRetry(story, 'twitter')} />
@@ -168,7 +169,7 @@ export default function ResultsStage({ stories, outputs, enabled, onRetry, onRes
               <AgentAvatar agent="linkedin" size={30} />
               <h3>LinkedIn post</h3>
               {out.linkedin?.status === 'done' && (
-                <button type="button" className="btn btn-ghost btn-sm" onClick={() => onRetry(story, 'linkedin')}>↻ Regenerate</button>
+                <button type="button" className="btn btn-ghost btn-sm" onClick={() => onRetry(story, 'linkedin')}><Icon name="refresh" size={13} /> Regenerate</button>
               )}
             </header>
             <LinkedInOutput result={out.linkedin} onRetry={() => onRetry(story, 'linkedin')} />
